@@ -1,0 +1,22 @@
+{
+  "name": "rubikub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/genintho/rubikub.git"
+  },
+  "author": "Thomas Genin <xt6.thomas.genin@gmail.com> (http://everymscount.com/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/genintho/rubikub/issues"
+  },
+  "homepage": "https://github.com/genintho/rubikub#readme",
+  "dependencies": {
+    "jest": "23.5.0"
+  }
+}
