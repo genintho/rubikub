@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/genintho/rubikub#readme",
   "dependencies": {
-    "jest": "23.5.0"
+    "jest": "23.5.0",
+    "parcel": "1.9.7",
+    "prettier": "1.14.2"
   }
 }
