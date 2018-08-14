@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey!</title>
+    <style>
+        td {
+            border: solid 1px black;
+            width: 20px;
+            height: 20px;
+        }
+
+        td:hover {
+            background-color: red;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background-color: black;
+            color: white;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .flex-container {
+            height: 95%;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row {
+            width: auto;
+            border: 1px solid blue;
+        }
+
+        .flex-item {
+            background-color: tomato;
+            padding: 5px;
+            width: 20px;
+            height: 20px;
+            margin: 10px;
+            line-height: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 2em;
+            text-align: center;
+        }
+
+        #player-board {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tile {
+            width: 30px;
+            height: 30px;
+            padding: 5px;
+            font-size: 20px;
+            margin: 5px;
+            border: solid 1px black;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 30px;
+        }
+    </style>
+    <script>
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text/html", ev.target.id);
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            ev.target.appendChild(document.getElementById(data));
+        }
+    </script>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+    <script src="./index.js"></script>
+</body>
+
+</html>
