@@ -18,7 +18,7 @@ class Tile {
 Tile.COLORS = {
     RED: "red",
     YELLOW: "orange",
-    BLUE: "blue",
+    BLUE: "#2196f3",
     GREEN: "green",
 };
 

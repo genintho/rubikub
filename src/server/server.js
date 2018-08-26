@@ -4,7 +4,8 @@ const express = require("express");
 const socketIO = require("socket.io");
 const ACTIONS = require("./actions");
 const path = require("path");
-const Tile = require("../models/Tile");
+const Tile = require("../models/TileModel");
+const TileModel = require("../models/TileGroupModel");
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, "index.html");
@@ -44,7 +45,7 @@ function sendState(id, socket) {
     const state = gameState.get(id);
     socket.emit(ACTIONS.GAME_STATE, {
         playerHand: state.playersHand[state.turn % state.playersHand.length],
-        table: state.table,
+        table: state.tableBoard,
     });
 }
 
@@ -67,11 +68,33 @@ function createGameInitialState(id, numPlayer) {
             playersHand[playerIdx].push(allTiles.splice(pickIdx, 1)[0]);
         }
     }
-
+    //
+    // const tableState = [];
+    // const group1 = new TileModel();
+    // group1.add(playersHand[0][1]);
+    // group1.add(playersHand[0][2]);
+    // const group2 = new TileModel();
+    // group2.add(playersHand[0][3]);
+    // group2.add(playersHand[0][4]);
+    // group2.add(playersHand[0][5]);
+    // const group3 = new TileModel();
+    // group3.add(playersHand[0][6]);
+    // group3.add(playersHand[0][7]);
+    // tableState[0] = [group1, group2];
+    // tableState[1] = [group3];
+    const tableBoard = [];
+    for(let rowIdx = 0; rowIdx < 10 ; rowIdx ++ ){
+        tableBoard[rowIdx] = [];
+        for(let columnIdx = 0 ; columnIdx < 14; columnIdx++) {
+            tableBoard[rowIdx][columnIdx]= null;
+        }
+    }
+    tableBoard[1][5] =  playersHand[0][1];
     gameState.set(id, {
         bucket: allTiles,
         playersHand,
-        table: {},
+        // table: tableState,
+        tableBoard,
         turn: 0,
     });
 }

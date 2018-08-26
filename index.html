@@ -12,10 +12,6 @@
             height: 20px;
         }
 
-        td:hover {
-            background-color: red;
-        }
-
         html,
         body {
             height: 100%;
@@ -38,7 +34,7 @@
 
         .row {
             width: auto;
-            border: 1px solid blue;
+            border: 1px solid #2196f3;
         }
 
         .flex-item {
@@ -59,18 +55,30 @@
             justify-content: center;
             flex-wrap: wrap;
         }
+        .cell {
+            width: 45px;
+            height: 45px;
+        }
 
         .tile {
             width: 30px;
             height: 30px;
             padding: 5px;
             font-size: 20px;
-            margin: 5px;
+            margin: 1px;
             border: solid 1px black;
             font-weight: bold;
             text-align: center;
             vertical-align: middle;
             line-height: 30px;
+        }
+
+        .moving {
+            background-color: yellow;
+        }
+
+        td {
+            border: solid 1px white;
         }
     </style>
     <script>
@@ -79,10 +87,12 @@
         }
 
         function drag(ev) {
+            console.log("drag", ev);
             ev.dataTransfer.setData("text/html", ev.target.id);
         }
 
         function drop(ev) {
+            console.log("drop", ev);
             ev.preventDefault();
             var data = ev.dataTransfer.getData("text");
             ev.target.appendChild(document.getElementById(data));
@@ -91,7 +101,9 @@
 </head>
 
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <table></table>
+    </div>
 
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 

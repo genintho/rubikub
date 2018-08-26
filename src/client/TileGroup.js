@@ -1,6 +1,6 @@
 import React from "react";
 
-export default class Tile extends React.Component {
+export default class TileGroup extends React.Component {
     render() {
         const { data } = this.props;
         if (data.isJoker) {
