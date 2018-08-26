@@ -39,6 +39,14 @@ io.on("connection", (socket) => {
         });
         sendState(roomID, socket);
     });
+
+    socket.on(ACTIONS.TRAY_MOVE, (msg)=>{
+        const roomID = msg.roomID;
+        console.log(ACTIONS.TRAY_MOVE, roomID);
+        const state = gameState.get(roomID);
+        const playerNum = state.turn % state.playersHand.length;
+        state.playersHand[playerNum] = msg.playerHand;
+    })
 });
 
 function sendState(id, socket) {

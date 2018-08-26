@@ -63,16 +63,14 @@ export default class App extends React.Component {
             console.log("GAME_STATE",msg);
             this.setState(processGameState(msg));
         });
+
+        window.socket = socket;
     }
 
     handleClick(dataSet, ev) {
         const target = ev.currentTarget;
         const currentRow = target.parentElement.rowIndex;
         const currentCell = target.cellIndex;
-        //     const source = target.parentElement.parentElement.rows[this.state.moving.row].cells[this.state.moving.cell];
-        //     target.innerHTML = source.innerHTML;
-        //     source.innerHTML = "";
-        //     source.classList.remove("moving");
         if (this.state.moving === null) {
             // target.classList.add("moving");
             this.setState({
@@ -85,7 +83,6 @@ export default class App extends React.Component {
             return
         }
         // ev.currentTarget.classList.remove("moving");
-        // const origin = this.state.moving.source;
         const dataOrigin = this.state[this.state.moving.source];
         const originRow = this.state.moving.row;
         const originCell = this.state.moving.cell;
@@ -108,7 +105,14 @@ export default class App extends React.Component {
     }
 
     handleTrayClick(ev) {
+        const wasTrayMove = this.state.moving !== null && this.state.moving.source === "playerHand";
         this.handleClick("playerHand", ev);
+        if (wasTrayMove) {
+            socket.emit(ACTIONS.TRAY_MOVE, {
+                roomID: location.hash.substr(1, location.hash.length),
+                playerHand: this.state.playerHand
+            });
+        }
     }
 
     render() {
