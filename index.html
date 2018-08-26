@@ -6,12 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hey!</title>
     <style>
-        td {
-            border: solid 1px black;
-            width: 20px;
-            height: 20px;
-        }
-
         html,
         body {
             height: 100%;
@@ -50,7 +44,9 @@
             text-align: center;
         }
 
-        #player-board {
+        .player-tray {
+            position: absolute;
+            bottom: 0;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
@@ -58,19 +54,6 @@
         .cell {
             width: 45px;
             height: 45px;
-        }
-
-        .tile {
-            width: 30px;
-            height: 30px;
-            padding: 5px;
-            font-size: 20px;
-            margin: 1px;
-            border: solid 1px black;
-            font-weight: bold;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 30px;
         }
 
         .moving {

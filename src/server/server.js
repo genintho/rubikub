@@ -45,7 +45,7 @@ function sendState(id, socket) {
     const state = gameState.get(id);
     socket.emit(ACTIONS.GAME_STATE, {
         playerHand: state.playersHand[state.turn % state.playersHand.length],
-        table: state.tableBoard,
+        board: state.board,
     });
 }
 
@@ -62,10 +62,13 @@ function createGameInitialState(id, numPlayer) {
 
     const playersHand = [];
     for (let playerIdx = 0; playerIdx < numPlayer; playerIdx++) {
-        playersHand[playerIdx] = [];
+        playersHand[playerIdx] = [[],[],[]];
         for (let pickNum = 0; pickNum < 14; pickNum++) {
+
             const pickIdx = getRandomInt(0, allTiles.length - 1);
-            playersHand[playerIdx].push(allTiles.splice(pickIdx, 1)[0]);
+            playersHand[playerIdx][0].push(allTiles.splice(pickIdx, 1)[0]);
+            playersHand[playerIdx][1].push(null);
+            playersHand[playerIdx][2].push(null);
         }
     }
     //
@@ -82,19 +85,19 @@ function createGameInitialState(id, numPlayer) {
     // group3.add(playersHand[0][7]);
     // tableState[0] = [group1, group2];
     // tableState[1] = [group3];
-    const tableBoard = [];
+    const board = [];
     for(let rowIdx = 0; rowIdx < 10 ; rowIdx ++ ){
-        tableBoard[rowIdx] = [];
+        board[rowIdx] = [];
         for(let columnIdx = 0 ; columnIdx < 14; columnIdx++) {
-            tableBoard[rowIdx][columnIdx]= null;
+            board[rowIdx][columnIdx]= null;
         }
     }
-    tableBoard[1][5] =  playersHand[0][1];
+    board[1][5] =  playersHand[0][1];
     gameState.set(id, {
         bucket: allTiles,
         playersHand,
         // table: tableState,
-        tableBoard,
+        board,
         turn: 0,
     });
 }

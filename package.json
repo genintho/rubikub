@@ -27,6 +27,7 @@
         "jest": "23.5.0",
         "parcel": "1.9.7",
         "prettier": "1.14.2",
+        "prop-types": "^15.6.2",
         "react": "16.4.2",
         "react-dom": "16.4.2",
         "socket.io": "2.1.1"

@@ -1,4 +1,5 @@
 import React from "react";
+import Styles from "./Tile.css";
 
 export default class Tile extends React.Component {
     render() {
@@ -9,7 +10,7 @@ export default class Tile extends React.Component {
         return (
             <div
                 draggable={true}
-                className="tile"
+                className={Styles.tile}
                 style={{ color: data.color, border: "solid 1px " + data.color }}
                 onDragStart={(ev)=>{drag(ev)}}
             >

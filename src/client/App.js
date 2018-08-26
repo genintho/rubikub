@@ -1,31 +1,36 @@
 import React from "react";
 import TileModel from "../models/TileModel";
-// import TileGroupModel from "../models/TileGroupModel";
 import * as ACTIONS from "../server/actions";
-// import Board from "./Board";
-import TableBoard from "./TableBoard";
+import TableOfTiles from "./TableOfTiles";
 
 function processGameState(gameState) {
-    const playerHand = gameState.playerHand.map((item) => {
-        return new TileModel(item.group, item.color, item.value);
-    });
-    const tableState = [];
-    gameState.table.forEach((row, rowIdx) => {
-        tableState[rowIdx] = [];
+    return {
+        playerHand: createModels(gameState.playerHand),
+        board: createModels(gameState.board)
+    };
+}
+
+function createModels(data) {
+    const matrix= [];
+    data.forEach((row, rowIdx) => {
+        matrix[rowIdx] = [];
         row.forEach((cell, cellIdx) => {
-            tableState[rowIdx][cellIdx] = cell === null ? null : new TileModel(cell.group, cell.color, cell.value);
+            matrix[rowIdx][cellIdx] = cell === null ? null : new TileModel(cell.group, cell.color, cell.value);
         });
     });
-
-    return { playerHand, table: tableState };
+    return matrix;
 }
 
 export default class App extends React.Component {
     constructor() {
         super();
+        this.handleClick = this.handleClick.bind(this);
+        this.handleBoardClick = this.handleBoardClick.bind(this);
+        this.handleTrayClick = this.handleTrayClick.bind(this);
         this.state = {
             playerHand: [],
-            table: [],
+            board: [],
+            moving: null,
         };
     }
     componentDidMount() {
@@ -59,11 +64,66 @@ export default class App extends React.Component {
             this.setState(processGameState(msg));
         });
     }
-    render() {
-        //<Board tableState={tableState}/>
-        return (<div>
-            <TableBoard board={this.state.table}/>
 
+    handleClick(dataSet, ev) {
+        const target = ev.currentTarget;
+        const currentRow = target.parentElement.rowIndex;
+        const currentCell = target.cellIndex;
+        //     const source = target.parentElement.parentElement.rows[this.state.moving.row].cells[this.state.moving.cell];
+        //     target.innerHTML = source.innerHTML;
+        //     source.innerHTML = "";
+        //     source.classList.remove("moving");
+        if (this.state.moving === null) {
+            // target.classList.add("moving");
+            this.setState({
+                moving: {
+                    row: currentRow,
+                    cell: currentCell,
+                    source: dataSet,
+                }
+            });
+            return
+        }
+        // ev.currentTarget.classList.remove("moving");
+        // const origin = this.state.moving.source;
+        const dataOrigin = this.state[this.state.moving.source];
+        const originRow = this.state.moving.row;
+        const originCell = this.state.moving.cell;
+        const data = dataOrigin[originRow][originCell];
+        const dataDest = this.state[dataSet];
+        const dd = dataDest[currentRow][currentCell];
+        dataDest[currentRow][currentCell] =data;
+        dataOrigin[originRow][originCell] = dd;
+
+        this.setState({
+            moving: null,
+            [dataSet]: dataDest,
+            [this.state.moving.source]: dataOrigin
+        })
+
+    }
+
+    handleBoardClick(ev) {
+        this.handleClick("board", ev);
+    }
+
+    handleTrayClick(ev) {
+        this.handleClick("playerHand", ev);
+    }
+
+    render() {
+        console.log(this.state);
+        return (<div>
+            <TableOfTiles
+                cls="board"
+                tiles={this.state.board}
+                onClick={this.handleBoardClick}
+            />
+            <TableOfTiles
+                cls="player-tray"
+                tiles={this.state.playerHand}
+                onClick={this.handleTrayClick}
+            />
         </div>);
     }
 }
