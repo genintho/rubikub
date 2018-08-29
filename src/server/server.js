@@ -45,6 +45,9 @@ io.on("connection", (socket) => {
         const state = gameState.get(roomID);
         state.playersHand[msg.playerID] = msg.playerHand;
     });
+    socket.on(ACTIONS.DRAW, (msg) => {
+        draw(msg.roomID, socket);
+    });
 });
 
 function sendState(id, socket) {
@@ -104,4 +107,19 @@ function createGameInitialState(id, numPlayer) {
         board,
         turn: 0,
     });
+}
+
+function draw(roomID, socket) {
+    const state = gameState.get(roomID);
+    const pickIdx = _random(0, state.bucket.length - 1);
+    const picks = [state.bucket.splice(pickIdx, 1)[0]];
+    const playerIdx = state.turn % state.playersHand.length;
+    state.playersHand[playerIdx].forEach((row, rowIdx) => {
+        row.forEach((cell, cellIdx) => {
+            if (cell === null && picks.length) {
+                state.playersHand[playerIdx][rowIdx][cellIdx] = picks.pop();
+            }
+        });
+    });
+    sendState(roomID, socket);
 }

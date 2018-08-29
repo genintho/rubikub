@@ -4,4 +4,5 @@ module.exports = {
     GAME_STATE: "game_state",
     JOIN_ROOM: "join_room",
     TRAY_MOVE: "tray_move",
+    DRAW: "draw",
 };

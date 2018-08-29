@@ -45,6 +45,8 @@ export default class App extends React.Component {
         this.handleBoardClick = this.handleBoardClick.bind(this);
         this.handleTrayClick = this.handleTrayClick.bind(this);
         this.handleResetClick = this.handleResetClick.bind(this);
+        // this.handlePlayClick = this.handlePlayClick.bind(this);
+        this.handleDrawClick = this.handleDrawClick.bind(this);
         this.state = {
             playerTray: [],
             board: [],
@@ -165,6 +167,20 @@ export default class App extends React.Component {
         // }
     }
 
+    // handlePlayClick() {
+    // User click play, let's check the state of the game
+    // 1. Make sure all board pieces are still there
+    // 2. Build all the groups of pieces we can find
+    // 3. Make sure all the groups are valid
+    // }
+
+    handleDrawClick() {
+        this.bob = 3;
+        socket.emit(ACTIONS.DRAW, {
+            roomID: window.location.hash.substr(1, window.location.hash.length),
+        });
+    }
+
     // saveTrayState() {
     //     const { playerTray } = this.state;
     //     window.socket.emit(ACTIONS.TRAY_MOVE, {
@@ -196,17 +212,22 @@ export default class App extends React.Component {
         //         this.state.board == this.state.previousValidState.board
         //     );
         const { board, playerTray } = this.state;
+        const isPlayerTurn = true;
+        const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>
-                <TableOfTiles
-                    cls="board"
-                    tiles={board}
-                    onClick={this.handleBoardClick}
-                />
-                <button type="button">Play</button>
-                <button type="button" onClick={this.handleResetClick}>
-                    Rest Moves
-                </button>
+                <TableOfTiles cls="board" tiles={board} onClick={boardClick} />
+                {isPlayerTurn && (
+                    <div>
+                        <button type="button">Play</button>
+                        <button type="button" onClick={this.handleDrawClick}>
+                            Draw
+                        </button>
+                        <button type="button" onClick={this.handleResetClick}>
+                            Rest Moves
+                        </button>
+                    </div>
+                )}
                 <TableOfTiles
                     cls="player-tray"
                     tiles={playerTray}
