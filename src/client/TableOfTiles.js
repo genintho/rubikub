@@ -1,15 +1,14 @@
 import React from "react";
 import Tile from "./Tile";
 
-
 export default class TableOfTiles extends React.Component {
-    constructor() {
-        super();
-        // this.state = {
-        //     moving: false
-        // };
-        // this.handleClick = this.handleClick.bind(this);
-    }
+    // constructor() {
+    //     super();
+    // this.state = {
+    //     moving: false
+    // };
+    // this.handleClick = this.handleClick.bind(this);
+    // }
     //
     // handleClick(ev) {
     //     const target = ev.currentTarget;
@@ -29,20 +28,37 @@ export default class TableOfTiles extends React.Component {
     // }
 
     render() {
-        return (<div className={this.props.cls}>
-            <table>
-                <tbody>
-                {this.props.tiles.map((row, rowIdx) => {
-                    return (<tr key={"row-" + rowIdx}>
-                        {row.map((cell, cellIdx) => {
-                            return (<td key={"cell-" + rowIdx + "-" + cellIdx} className="cell" onClick={this.props.onClick}>
-                                {cell !== null && <Tile data={cell} />}
-                            </td>);
+        return (
+            <div className={this.props.cls}>
+                <table>
+                    <tbody>
+                        {this.props.tiles.map((row, rowIdx) => {
+                            return (
+                                <tr key={"row-" + rowIdx}>
+                                    {row.map((cell, cellIdx) => {
+                                        return (
+                                            <td
+                                                key={
+                                                    "cell-" +
+                                                    rowIdx +
+                                                    "-" +
+                                                    cellIdx
+                                                }
+                                                className="cell"
+                                                onClick={this.props.onClick}
+                                            >
+                                                {cell !== null && (
+                                                    <Tile data={cell} />
+                                                )}
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            );
                         })}
-                    </tr>);
-                })}
-                </tbody>
-            </table>
-        </div>);
+                    </tbody>
+                </table>
+            </div>
+        );
     }
 }

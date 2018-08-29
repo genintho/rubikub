@@ -1,27 +1,41 @@
+/* global io window socket */
 import React from "react";
+import { List } from "immutable";
 import TileModel from "../models/TileModel";
 import * as ACTIONS from "../server/actions";
 import TableOfTiles from "./TableOfTiles";
 
-function processGameState(gameState) {
-    return {
-        playerHand: createModels(gameState.playerHand),
-        board: createModels(gameState.board),
-    };
-}
+const BOARD = "board";
+const PLAYER_TRAY = "playerTray";
 
 function createModels(data) {
-    const matrix = [];
+    let matrix = List();
     data.forEach((row, rowIdx) => {
-        matrix[rowIdx] = [];
+        let rowList = List();
         row.forEach((cell, cellIdx) => {
-            matrix[rowIdx][cellIdx] =
+            rowList = rowList.set(
+                cellIdx,
                 cell === null
                     ? null
-                    : new TileModel(cell.group, cell.color, cell.value);
+                    : new TileModel(cell.group, cell.color, cell.value)
+            );
         });
+        matrix = matrix.set(rowIdx, rowList);
     });
     return matrix;
+}
+
+function processGameState(gameState) {
+    const board = createModels(gameState.board);
+    const playerTray = createModels(gameState.playerTray);
+    return {
+        board,
+        playerTray,
+        previousValidState: {
+            board,
+            playerTray,
+        },
+    };
 }
 
 export default class App extends React.Component {
@@ -30,36 +44,39 @@ export default class App extends React.Component {
         this.handleClick = this.handleClick.bind(this);
         this.handleBoardClick = this.handleBoardClick.bind(this);
         this.handleTrayClick = this.handleTrayClick.bind(this);
+        this.handleResetClick = this.handleResetClick.bind(this);
         this.state = {
-            playerHand: [],
+            playerTray: [],
             board: [],
             moving: null,
+            previousValidState: null,
         };
     }
+
     componentDidMount() {
         const socket = io("localhost:3000");
 
-        socket.on("connect", function() {
+        socket.on("connect", () => {
             // Connected , let's sign-up for to receive messages for this room
-            if (location.hash.length === 0) {
+            if (window.location.hash.length === 0) {
                 console.log("need to create a room");
-                const numPlayer = 2; //prompt("How many player?");
+                // const numPlayer = prompt("How many player?");
                 socket.emit(ACTIONS.CREATE_ROOM, {
-                    numPlayer: parseInt(numPlayer, 10),
+                    numPlayer: 2, // parseInt(numPlayer, 10),
                 });
             } else {
                 console.log("join room");
                 socket.emit(
                     ACTIONS.JOIN_ROOM,
-                    location.hash.substr(1, location.hash.length)
+                    window.location.hash.substr(1, window.location.hash.length)
                 );
             }
         });
         socket.on("RESET", () => {
-            location.href = "/";
+            window.location.href = "/";
         });
         socket.on(ACTIONS.CREATED_ROOM, (msg) => {
-            location.hash = msg.roomID;
+            window.location.hash = msg.roomID;
             console.log(msg);
         });
         socket.on(ACTIONS.GAME_STATE, (msg) => {
@@ -70,68 +87,129 @@ export default class App extends React.Component {
         window.socket = socket;
     }
 
-    handleClick(dataSet, ev) {
-        const target = ev.currentTarget;
-        const currentRow = target.parentElement.rowIndex;
-        const currentCell = target.cellIndex;
-        if (this.state.moving === null) {
-            // target.classList.add("moving");
-            this.setState({
-                moving: {
-                    row: currentRow,
-                    cell: currentCell,
-                    source: dataSet,
-                },
-            });
-            return;
-        }
-        // ev.currentTarget.classList.remove("moving");
-        const dataOrigin = this.state[this.state.moving.source];
-        const originRow = this.state.moving.row;
-        const originCell = this.state.moving.cell;
-        const data = dataOrigin[originRow][originCell];
-        const dataDest = this.state[dataSet];
-        const dd = dataDest[currentRow][currentCell];
-        dataDest[currentRow][currentCell] = data;
-        dataOrigin[originRow][originCell] = dd;
+    log(msg) {
+        if (this.state.previousValidState)
+            console.log(
+                msg,
+                // this.state.previousValidState.board[
+                // this.state.previousValidState.board.size - 1
+                // ][0],
+                this.state
+            );
+    }
 
-        this.setState({
-            moving: null,
-            [dataSet]: dataDest,
-            [this.state.moving.source]: dataOrigin,
+    handleClick(newSource, ev) {
+        this.log("Click " + newSource);
+        const target = ev.currentTarget;
+        this.setState((prevState) => {
+            const currentRow = target.parentElement.rowIndex;
+            const currentCell = target.cellIndex;
+            if (prevState.moving === null) {
+                // target.classList.add("moving");
+                return {
+                    moving: {
+                        row: currentRow,
+                        cell: currentCell,
+                        source: newSource,
+                    },
+                };
+            }
+            const dataPatch = { moving: null };
+            const originSource = prevState.moving.source;
+            // ev.currentTarget.classList.remove("moving");
+
+            let dataOrigin = prevState[prevState.moving.source];
+            const originRow = prevState.moving.row;
+            const originCell = prevState.moving.cell;
+            const newData = dataOrigin.get(originRow).get(originCell);
+            let dataDest = prevState[newSource];
+
+            // Get the value in the cell we are moving into
+            const oldData = dataDest.get(currentRow).get(currentCell);
+
+            // Set the new value
+            dataDest = dataDest.setIn([currentRow, currentCell], newData);
+
+            // Now we need to put back the old value into the origin: swap
+            if (newSource === originSource) {
+                dataDest = dataDest.setIn([originRow, originCell], oldData);
+                dataPatch[newSource] = dataDest;
+            }
+            dataPatch[newSource] = dataDest;
+            if (newSource !== originSource) {
+                dataOrigin = dataOrigin.setIn([originRow, originCell], oldData);
+                dataPatch[originSource] = dataOrigin;
+            }
+
+            return dataPatch;
+
+            // return {
+            //     // moving: null,
+            //     [newSource]: dataDest,
+            //     [originSource]: dataOrigin,
+            // };
         });
     }
 
     handleBoardClick(ev) {
-        this.handleClick("board", ev);
+        this.handleClick(BOARD, ev);
+        this.log("post click");
     }
 
     handleTrayClick(ev) {
-        const wasTrayMove =
-            this.state.moving !== null &&
-            this.state.moving.source === "playerHand";
-        this.handleClick("playerHand", ev);
-        if (wasTrayMove) {
-            socket.emit(ACTIONS.TRAY_MOVE, {
-                roomID: location.hash.substr(1, location.hash.length),
-                playerID: 0,
-                playerHand: this.state.playerHand,
-            });
-        }
+        // const { moving } = this.state;
+        // const wasTrayMove = moving !== null && moving.source === "playerTray";
+        this.handleClick(PLAYER_TRAY, ev);
+        // if (wasTrayMove) {
+        //     this.saveTrayState();
+        // }
+    }
+
+    // saveTrayState() {
+    //     const { playerTray } = this.state;
+    //     window.socket.emit(ACTIONS.TRAY_MOVE, {
+    //         roomID: window.location.hash.substr(1, window.location.hash.length),
+    //         playerID: 0,
+    //         playerTray,
+    //     });
+    // }
+
+    handleResetClick() {
+        this.log("Click Reset");
+        const { previousValidState } = Object.assign({}, this.state);
+        this.setState({
+            // return {
+            moving: null,
+            board: previousValidState.board,
+            playerTray: previousValidState.playerTray,
+            // };
+        });
     }
 
     render() {
-        console.log(this.state);
+        this.log("Render");
+
+        // if (this.state.board.length)
+        //     console.log(
+        //         "equal",
+
+        //         this.state.board == this.state.previousValidState.board
+        //     );
+        const { board, playerTray } = this.state;
         return (
             <div>
                 <TableOfTiles
                     cls="board"
-                    tiles={this.state.board}
+                    tiles={board}
                     onClick={this.handleBoardClick}
                 />
+                <button type="button">Play</button>
+                <button type="button" onClick={this.handleResetClick}>
+                    Rest Moves
+                </button>
                 <TableOfTiles
                     cls="player-tray"
-                    tiles={this.state.playerHand}
+                    tiles={playerTray}
                     onClick={this.handleTrayClick}
                 />
             </div>

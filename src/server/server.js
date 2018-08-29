@@ -1,7 +1,6 @@
-"use strict";
-
 const express = require("express");
 const socketIO = require("socket.io");
+const _random = require("lodash/random"); // eslint-disable-line
 const ACTIONS = require("./actions");
 const path = require("path");
 const Tile = require("../models/TileModel");
@@ -51,7 +50,7 @@ io.on("connection", (socket) => {
 function sendState(id, socket) {
     const state = gameState.get(id);
     socket.emit(ACTIONS.GAME_STATE, {
-        playerHand: state.playersHand[state.turn % state.playersHand.length],
+        playerTray: state.playersHand[state.turn % state.playersHand.length],
         board: state.board,
     });
 }
@@ -71,7 +70,7 @@ function createGameInitialState(id, numPlayer) {
     for (let playerIdx = 0; playerIdx < numPlayer; playerIdx++) {
         playersHand[playerIdx] = [[], [], []];
         for (let pickNum = 0; pickNum < 14; pickNum++) {
-            const pickIdx = getRandomInt(0, allTiles.length - 1);
+            const pickIdx = _random(0, allTiles.length - 1);
             playersHand[playerIdx][0].push(allTiles.splice(pickIdx, 1)[0]);
             playersHand[playerIdx][1].push(null);
             playersHand[playerIdx][2].push(null);
@@ -98,7 +97,6 @@ function createGameInitialState(id, numPlayer) {
             board[rowIdx][columnIdx] = null;
         }
     }
-    board[1][5] = playersHand[0][1];
     gameState.set(id, {
         bucket: allTiles,
         playersHand,
@@ -106,10 +104,4 @@ function createGameInitialState(id, numPlayer) {
         board,
         turn: 0,
     });
-}
-
-function getRandomInt(min2, max2) {
-    const min = Math.ceil(min2);
-    const max = Math.floor(max2);
-    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
