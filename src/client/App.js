@@ -6,16 +6,19 @@ import TableOfTiles from "./TableOfTiles";
 function processGameState(gameState) {
     return {
         playerHand: createModels(gameState.playerHand),
-        board: createModels(gameState.board)
+        board: createModels(gameState.board),
     };
 }
 
 function createModels(data) {
-    const matrix= [];
+    const matrix = [];
     data.forEach((row, rowIdx) => {
         matrix[rowIdx] = [];
         row.forEach((cell, cellIdx) => {
-            matrix[rowIdx][cellIdx] = cell === null ? null : new TileModel(cell.group, cell.color, cell.value);
+            matrix[rowIdx][cellIdx] =
+                cell === null
+                    ? null
+                    : new TileModel(cell.group, cell.color, cell.value);
         });
     });
     return matrix;
@@ -40,7 +43,7 @@ export default class App extends React.Component {
             // Connected , let's sign-up for to receive messages for this room
             if (location.hash.length === 0) {
                 console.log("need to create a room");
-                const numPlayer = prompt("How many player?");
+                const numPlayer = 2; //prompt("How many player?");
                 socket.emit(ACTIONS.CREATE_ROOM, {
                     numPlayer: parseInt(numPlayer, 10),
                 });
@@ -60,7 +63,7 @@ export default class App extends React.Component {
             console.log(msg);
         });
         socket.on(ACTIONS.GAME_STATE, (msg) => {
-            console.log("GAME_STATE",msg);
+            console.log("GAME_STATE", msg);
             this.setState(processGameState(msg));
         });
 
@@ -78,9 +81,9 @@ export default class App extends React.Component {
                     row: currentRow,
                     cell: currentCell,
                     source: dataSet,
-                }
+                },
             });
-            return
+            return;
         }
         // ev.currentTarget.classList.remove("moving");
         const dataOrigin = this.state[this.state.moving.source];
@@ -89,15 +92,14 @@ export default class App extends React.Component {
         const data = dataOrigin[originRow][originCell];
         const dataDest = this.state[dataSet];
         const dd = dataDest[currentRow][currentCell];
-        dataDest[currentRow][currentCell] =data;
+        dataDest[currentRow][currentCell] = data;
         dataOrigin[originRow][originCell] = dd;
 
         this.setState({
             moving: null,
             [dataSet]: dataDest,
-            [this.state.moving.source]: dataOrigin
-        })
-
+            [this.state.moving.source]: dataOrigin,
+        });
     }
 
     handleBoardClick(ev) {
@@ -105,29 +107,34 @@ export default class App extends React.Component {
     }
 
     handleTrayClick(ev) {
-        const wasTrayMove = this.state.moving !== null && this.state.moving.source === "playerHand";
+        const wasTrayMove =
+            this.state.moving !== null &&
+            this.state.moving.source === "playerHand";
         this.handleClick("playerHand", ev);
         if (wasTrayMove) {
             socket.emit(ACTIONS.TRAY_MOVE, {
                 roomID: location.hash.substr(1, location.hash.length),
-                playerHand: this.state.playerHand
+                playerID: 0,
+                playerHand: this.state.playerHand,
             });
         }
     }
 
     render() {
         console.log(this.state);
-        return (<div>
-            <TableOfTiles
-                cls="board"
-                tiles={this.state.board}
-                onClick={this.handleBoardClick}
-            />
-            <TableOfTiles
-                cls="player-tray"
-                tiles={this.state.playerHand}
-                onClick={this.handleTrayClick}
-            />
-        </div>);
+        return (
+            <div>
+                <TableOfTiles
+                    cls="board"
+                    tiles={this.state.board}
+                    onClick={this.handleBoardClick}
+                />
+                <TableOfTiles
+                    cls="player-tray"
+                    tiles={this.state.playerHand}
+                    onClick={this.handleTrayClick}
+                />
+            </div>
+        );
     }
 }

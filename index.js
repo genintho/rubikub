@@ -5,6 +5,6 @@ import ReactDOM from "react-dom";
 
 document.addEventListener("DOMContentLoaded", () => {
     var mountNode = document.getElementById("app");
-    ReactDOM.render(<App/>, mountNode);
+    ReactDOM.render(<App />, mountNode);
     // main();
 });
