@@ -1,0 +1,8 @@
+{
+  "extends": ["airbnb",  "prettier"],
+  "rules": {
+    "react/jsx-indent": 4,
+    "react/jsx-indent-props": 4,
+    "react/jsx-filename-extension": "off",
+  }
+}
