@@ -121,5 +121,6 @@ function draw(roomID, socket) {
             }
         });
     });
+    state.turn += 1;
     sendState(roomID, socket);
 }
