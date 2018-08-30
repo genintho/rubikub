@@ -83,7 +83,7 @@ export default class App extends React.Component {
             }
         });
 
-        socket.on("RESET", () => {
+        socket.on(ACTIONS.GAME_RESET, () => {
             window.location.href = "/";
         });
 
@@ -233,7 +233,9 @@ export default class App extends React.Component {
         //         this.state.board == this.state.previousValidState.board
         //     );
         const { board, playerTray, players, turn } = this.state;
-        const isPlayerTurn = true;
+        const isPlayerTurn =
+            players[turn % players.length] ===
+            window.localStorage.getItem("playerID");
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>

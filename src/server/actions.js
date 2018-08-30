@@ -7,4 +7,5 @@ module.exports = {
     DRAW: "draw",
     PLAY: "play",
     RELOAD: "reload",
+    GAME_RESET: "game_reset",
 };
