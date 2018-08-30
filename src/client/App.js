@@ -65,24 +65,36 @@ export default class App extends React.Component {
                 // const numPlayer = prompt("How many player?");
                 socket.emit(ACTIONS.CREATE_ROOM, {
                     numPlayer: 2, // parseInt(numPlayer, 10),
+                    playerID: window.localStorage.getItem("playerID"),
                 });
             } else {
                 console.log("join room");
-                socket.emit(
-                    ACTIONS.JOIN_ROOM,
-                    window.location.hash.substr(1, window.location.hash.length)
+                const roomID = window.location.hash.substr(
+                    1,
+                    window.location.hash.length
                 );
+                socket.emit(ACTIONS.JOIN_ROOM, {
+                    roomID,
+                    playerID: window.localStorage.getItem("playerID"),
+                });
             }
         });
+
         socket.on("RESET", () => {
             window.location.href = "/";
         });
-        socket.on(ACTIONS.CREATED_ROOM, (msg) => {
-            window.location.hash = msg.roomID;
-            console.log(msg);
+
+        socket.on(ACTIONS.CREATED_ROOM, ({ roomID, playerID }) => {
+            window.location.hash = roomID;
+            window.localStorage.setItem("playerID", playerID);
+            window.setTimeout(() => {
+                window.location.reload();
+            }, 200);
         });
+
         socket.on(ACTIONS.GAME_STATE, (msg) => {
             console.log("GAME_STATE", msg);
+            window.localStorage.setItem("playerID", msg.playerID);
             this.setState(processGameState(msg));
         });
 
@@ -176,15 +188,12 @@ export default class App extends React.Component {
 
     handleDrawClick() {
         this.bob = 3;
-        socket.emit(ACTIONS.DRAW, {
-            roomID: window.location.hash.substr(1, window.location.hash.length),
-        });
+        socket.emit(ACTIONS.DRAW, {});
     }
 
     // saveTrayState() {
     //     const { playerTray } = this.state;
     //     window.socket.emit(ACTIONS.TRAY_MOVE, {
-    //         roomID: window.location.hash.substr(1, window.location.hash.length),
     //         playerID: 0,
     //         playerTray,
     //     });

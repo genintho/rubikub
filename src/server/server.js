@@ -1,10 +1,11 @@
+/* eslint-disable no-plusplus */
 const express = require("express");
 const socketIO = require("socket.io");
+const path = require("path");
 const _random = require("lodash/random"); // eslint-disable-line
 const ACTIONS = require("./actions");
-const path = require("path");
 const Tile = require("../models/TileModel");
-const TileModel = require("../models/TileGroupModel");
+// const TileModel = require("../models/TileGroupModel");
 
 const PORT = process.env.PORT || 3000;
 const INDEX = path.join(__dirname, "index.html");
@@ -16,46 +17,23 @@ const server = express()
 const io = socketIO(server);
 const gameState = new Map();
 
-io.on("connection", (socket) => {
-    console.log("Client connected");
-    socket.on("disconnect", () => console.log("Client disconnected"));
-    socket.on(ACTIONS.JOIN_ROOM, function(roomID) {
-        console.log("JOIN room", roomID);
-        if (!gameState.has(roomID)) {
-            socket.emit("RESET");
-            return;
-        }
-        socket.join(roomID);
-        sendState(roomID, socket);
-    });
-    socket.on(ACTIONS.CREATE_ROOM, function(msg) {
-        const roomID = socket.id;
-        console.log("CREATE ROOM", roomID);
-        socket.join(roomID);
-        createGameInitialState(roomID, msg.numPlayer);
-        socket.emit(ACTIONS.CREATED_ROOM, {
-            roomID,
-        });
-        sendState(roomID, socket);
-    });
-
-    socket.on(ACTIONS.TRAY_MOVE, (msg) => {
-        const roomID = msg.roomID;
-        console.log(ACTIONS.TRAY_MOVE, roomID);
-        const state = gameState.get(roomID);
-        state.playersHand[msg.playerID] = msg.playerHand;
-    });
-    socket.on(ACTIONS.DRAW, (msg) => {
-        draw(msg.roomID, socket);
-    });
-});
-
-function sendState(id, socket) {
-    const state = gameState.get(id);
+function sendState(socket) {
+    const state = gameState.get(socket.roomID);
     socket.emit(ACTIONS.GAME_STATE, {
-        playerTray: state.playersHand[state.turn % state.playersHand.length],
+        playerTray: state.playersHand[state.players.indexOf(socket.playerID)],
         board: state.board,
+        playerID: socket.playerID,
+        players: state.players,
+        turn: state.turn,
     });
+}
+
+function assignPlayer(socket, playerID) {
+    socket.playerID = playerID === null ? socket.id : playerID; // eslint-disable-line
+    const state = gameState.get(socket.roomID);
+    if (state.players.indexOf(socket.playerID) === -1) {
+        state.players[state.players.indexOf(null)] = playerID;
+    }
 }
 
 function createGameInitialState(id, numPlayer) {
@@ -70,8 +48,10 @@ function createGameInitialState(id, numPlayer) {
     });
 
     const playersHand = [];
+    const players = [];
     for (let playerIdx = 0; playerIdx < numPlayer; playerIdx++) {
         playersHand[playerIdx] = [[], [], []];
+        players[playerIdx] = null;
         for (let pickNum = 0; pickNum < 14; pickNum++) {
             const pickIdx = _random(0, allTiles.length - 1);
             playersHand[playerIdx][0].push(allTiles.splice(pickIdx, 1)[0]);
@@ -79,20 +59,7 @@ function createGameInitialState(id, numPlayer) {
             playersHand[playerIdx][2].push(null);
         }
     }
-    //
-    // const tableState = [];
-    // const group1 = new TileModel();
-    // group1.add(playersHand[0][1]);
-    // group1.add(playersHand[0][2]);
-    // const group2 = new TileModel();
-    // group2.add(playersHand[0][3]);
-    // group2.add(playersHand[0][4]);
-    // group2.add(playersHand[0][5]);
-    // const group3 = new TileModel();
-    // group3.add(playersHand[0][6]);
-    // group3.add(playersHand[0][7]);
-    // tableState[0] = [group1, group2];
-    // tableState[1] = [group3];
+
     const board = [];
     for (let rowIdx = 0; rowIdx < 10; rowIdx++) {
         board[rowIdx] = [];
@@ -103,17 +70,18 @@ function createGameInitialState(id, numPlayer) {
     gameState.set(id, {
         bucket: allTiles,
         playersHand,
+        players,
         // table: tableState,
         board,
         turn: 0,
     });
 }
 
-function draw(roomID, socket) {
-    const state = gameState.get(roomID);
+function draw(socket) {
+    const state = gameState.get(socket.roomID);
     const pickIdx = _random(0, state.bucket.length - 1);
     const picks = [state.bucket.splice(pickIdx, 1)[0]];
-    const playerIdx = state.turn % state.playersHand.length;
+    const playerIdx = state.players.indexOf(socket.playerID);
     state.playersHand[playerIdx].forEach((row, rowIdx) => {
         row.forEach((cell, cellIdx) => {
             if (cell === null && picks.length) {
@@ -122,5 +90,49 @@ function draw(roomID, socket) {
         });
     });
     state.turn += 1;
-    sendState(roomID, socket);
+    sendState(socket);
 }
+
+io.on("connection", (socket) => {
+    console.log("Client connected");
+    socket.on("disconnect", () => console.log("Client disconnected"));
+
+    socket.on(ACTIONS.CREATE_ROOM, ({ numPlayer, playerID }) => {
+        const roomID = socket.id;
+        socket.roomID = roomID; // eslint-disable-line
+        console.log("CREATE ROOM", roomID);
+        socket.join(roomID);
+        if (!playerID) {
+            playerID = socket.id; // eslint-disable-line
+        }
+        createGameInitialState(roomID, numPlayer);
+        socket.emit(ACTIONS.CREATED_ROOM, {
+            roomID,
+            playerID,
+        });
+    });
+
+    socket.on(ACTIONS.JOIN_ROOM, ({ roomID, playerID }) => {
+        console.log("JOIN room", roomID, "player", playerID);
+        if (!gameState.has(roomID)) {
+            socket.emit("RESET");
+            return;
+        }
+
+        socket.roomID = roomID; // eslint-disable-line
+        socket.join(roomID);
+        assignPlayer(socket, playerID);
+        sendState(socket);
+    });
+
+    socket.on(ACTIONS.TRAY_MOVE, (msg) => {
+        console.log(ACTIONS.TRAY_MOVE, socket.roomID);
+        const state = gameState.get(socket.roomID);
+        state.playersHand[msg.playerID] = msg.playerHand;
+    });
+
+    socket.on(ACTIONS.DRAW, () => {
+        console.log("Draw");
+        draw(socket);
+    });
+});
