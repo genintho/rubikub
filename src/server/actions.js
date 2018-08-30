@@ -5,4 +5,5 @@ module.exports = {
     JOIN_ROOM: "join_room",
     TRAY_MOVE: "tray_move",
     DRAW: "draw",
+    PLAY: "play",
 };

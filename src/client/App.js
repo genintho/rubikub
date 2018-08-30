@@ -31,6 +31,8 @@ function processGameState(gameState) {
     return {
         board,
         playerTray,
+        players: gameState.players,
+        turn: gameState.turn,
         previousValidState: {
             board,
             playerTray,
@@ -45,11 +47,12 @@ export default class App extends React.Component {
         this.handleBoardClick = this.handleBoardClick.bind(this);
         this.handleTrayClick = this.handleTrayClick.bind(this);
         this.handleResetClick = this.handleResetClick.bind(this);
-        // this.handlePlayClick = this.handlePlayClick.bind(this);
+        this.handlePlayClick = this.handlePlayClick.bind(this);
         this.handleDrawClick = this.handleDrawClick.bind(this);
         this.state = {
             playerTray: [],
             board: [],
+            players: [],
             moving: null,
             previousValidState: null,
         };
@@ -179,12 +182,13 @@ export default class App extends React.Component {
         // }
     }
 
-    // handlePlayClick() {
-    // User click play, let's check the state of the game
-    // 1. Make sure all board pieces are still there
-    // 2. Build all the groups of pieces we can find
-    // 3. Make sure all the groups are valid
-    // }
+    handlePlayClick() {
+        // User click play, let's check the state of the game
+        // 1. Make sure all board pieces are still there
+        // 2. Build all the groups of pieces we can find
+        // 3. Make sure all the groups are valid
+        socket.emit(ACTIONS.PLAY, { board: this.state.board });
+    }
 
     handleDrawClick() {
         this.bob = 3;
@@ -220,11 +224,20 @@ export default class App extends React.Component {
 
         //         this.state.board == this.state.previousValidState.board
         //     );
-        const { board, playerTray } = this.state;
+        const { board, playerTray, players, turn } = this.state;
         const isPlayerTurn = true;
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>
+                <h1>Turn {turn}</h1>
+                <div className="players-list">
+                    <p>Players:</p>
+                    <ul>
+                        {players.map((playerName) => (
+                            <li key={playerName}>{playerName}</li>
+                        ))}
+                    </ul>
+                </div>
                 <TableOfTiles cls="board" tiles={board} onClick={boardClick} />
                 {isPlayerTurn && (
                     <div>
