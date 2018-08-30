@@ -1,9 +1,8 @@
 class Tile {
-    constructor(group, color, value) {
-        this.group = group;
+    constructor(set, color, value) {
+        this.set = set;
         this.color = color;
         this.value = value;
-        this.has;
     }
 
     get isJoker() {
@@ -11,7 +10,7 @@ class Tile {
     }
 
     get id() {
-        return this.group + "_" + this.color + "_" + this.value;
+        return this.set + "_" + this.color + "_" + this.value; // eslint-disable-line
     }
 }
 

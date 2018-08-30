@@ -4,6 +4,7 @@ import { List } from "immutable";
 import TileModel from "../models/TileModel";
 import * as ACTIONS from "../server/actions";
 import TableOfTiles from "./TableOfTiles";
+import isValidMove from "../lib/isValidMove";
 
 const BOARD = "board";
 const PLAYER_TRAY = "playerTray";
@@ -192,6 +193,12 @@ export default class App extends React.Component {
         // 2. Build all the groups of pieces we can find
         // 3. Make sure all the groups are valid
         console.log(this.state.board.toJS());
+        if (
+            !isValidMove(this.state.board, this.state.previousValidState.board)
+        ) {
+            alert("INVALID MOVE");
+            return;
+        }
         socket.emit(ACTIONS.PLAY, {
             board: JSON.stringify(this.state.board.toJS()),
             playerTray: JSON.stringify(this.state.playerTray.toJS()),
