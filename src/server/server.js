@@ -91,6 +91,7 @@ function draw(socket) {
     });
     state.turn += 1;
     sendState(socket);
+    socket.broadcast.emit(ACTIONS.RELOAD);
 }
 
 io.on("connection", (socket) => {
@@ -134,5 +135,18 @@ io.on("connection", (socket) => {
     socket.on(ACTIONS.DRAW, () => {
         console.log("Draw");
         draw(socket);
+    });
+
+    socket.on(ACTIONS.PLAY, ({ board, playerTray }) => {
+        console.log(socket.roomID, socket.playerID, board);
+        const state = gameState.get(socket.roomID);
+        // @TODO add check that the correct user is playing
+        state.turn++;
+        state.board = JSON.parse(board);
+        state.playersHand[state.players.indexOf(socket.playerID)] = JSON.parse(
+            playerTray
+        );
+        sendState(socket);
+        socket.broadcast.emit(ACTIONS.RELOAD);
     });
 });

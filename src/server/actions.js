@@ -6,4 +6,5 @@ module.exports = {
     TRAY_MOVE: "tray_move",
     DRAW: "draw",
     PLAY: "play",
+    RELOAD: "reload",
 };

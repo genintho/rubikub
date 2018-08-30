@@ -101,6 +101,10 @@ export default class App extends React.Component {
             this.setState(processGameState(msg));
         });
 
+        socket.on(ACTIONS.RELOAD, () => {
+            window.location.reload();
+        });
+
         window.socket = socket;
     }
 
@@ -187,7 +191,11 @@ export default class App extends React.Component {
         // 1. Make sure all board pieces are still there
         // 2. Build all the groups of pieces we can find
         // 3. Make sure all the groups are valid
-        socket.emit(ACTIONS.PLAY, { board: this.state.board });
+        console.log(this.state.board.toJS());
+        socket.emit(ACTIONS.PLAY, {
+            board: JSON.stringify(this.state.board.toJS()),
+            playerTray: JSON.stringify(this.state.playerTray.toJS()),
+        });
     }
 
     handleDrawClick() {
@@ -241,7 +249,9 @@ export default class App extends React.Component {
                 <TableOfTiles cls="board" tiles={board} onClick={boardClick} />
                 {isPlayerTurn && (
                     <div>
-                        <button type="button">Play</button>
+                        <button type="button" onClick={this.handlePlayClick}>
+                            Play
+                        </button>
                         <button type="button" onClick={this.handleDrawClick}>
                             Draw
                         </button>
