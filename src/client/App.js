@@ -121,7 +121,6 @@ export default class App extends React.Component {
     }
 
     handleClick(newSource, ev) {
-        this.log("Click " + newSource);
         const target = ev.currentTarget;
         this.setState((prevState) => {
             const currentRow = target.parentElement.rowIndex;
@@ -196,7 +195,7 @@ export default class App extends React.Component {
         if (
             !isValidMove(this.state.board, this.state.previousValidState.board)
         ) {
-            alert("INVALID MOVE");
+            window.alert("INVALID MOVE"); // eslint-disable-line no-alert
             return;
         }
         socket.emit(ACTIONS.PLAY, {
@@ -246,7 +245,10 @@ export default class App extends React.Component {
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>
-                <h1>Turn {turn}</h1>
+                <h1>
+                    Turn
+                    {turn}
+                </h1>
                 <div className="players-list">
                     <p>Players:</p>
                     <ul>

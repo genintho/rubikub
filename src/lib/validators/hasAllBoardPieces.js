@@ -1,7 +1,4 @@
 module.exports = function hasAllBoardPieces(currentBoard, previousBoard) {
-    console.log("hasAllBoardPieces");
-    console.log(currentBoard.toJS());
-    console.log(previousBoard.toJS());
     const newBoardTiles = new Set();
     currentBoard.forEach((row) => {
         row.forEach((cell) => {
