@@ -18,7 +18,6 @@ import {
     TileRow,
     IuiMove,
 } from "./types/Game";
-import { cloneDeep } from "@babel/types";
 
 declare var socket: ISocket;
 
@@ -226,7 +225,6 @@ export default class App extends React.Component<IProps, IState> {
                 // @ts-ignore
                 dataPatch[originSource] = dataOrigin;
             }
-
             return dataPatch;
 
             // return {
@@ -239,7 +237,6 @@ export default class App extends React.Component<IProps, IState> {
 
     handleBoardClick(ev: React.MouseEvent<HTMLTableCellElement>) {
         this.handleClick(EClickSrc.Board, ev);
-        this.log("post click");
     }
 
     handleTrayClick(ev: React.MouseEvent<HTMLTableCellElement>) {
@@ -264,7 +261,6 @@ export default class App extends React.Component<IProps, IState> {
         // 1. Make sure all board pieces are still there
         // 2. Build all the groups of pieces we can find
         // 3. Make sure all the groups are valid
-        console.log(board);
         if (!isValidMove(board, previousValidState.board)) {
             window.alert("INVALID MOVE"); // eslint-disable-line no-alert
             return;
@@ -276,7 +272,6 @@ export default class App extends React.Component<IProps, IState> {
     }
 
     handleDrawClick() {
-        // this.bob = 3;
         socket.emit(ACTIONS.DRAW, {});
     }
 

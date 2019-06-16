@@ -25,7 +25,6 @@ export function hasAllBoardPieces(
 }
 
 export function hasMoved(currentBoard: IBoard, previousBoard: IBoard): boolean {
-    console.log(currentBoard, previousBoard);
     const newBoardTiles = new Set();
     currentBoard.forEach((row) => {
         row.forEach((cell) => {
@@ -34,7 +33,6 @@ export function hasMoved(currentBoard: IBoard, previousBoard: IBoard): boolean {
             }
         });
     });
-    console.log(newBoardTiles);
     previousBoard.forEach((row) => {
         row.forEach((cell) => {
             if (cell && newBoardTiles.has(cell.id)) {
@@ -42,6 +40,5 @@ export function hasMoved(currentBoard: IBoard, previousBoard: IBoard): boolean {
             }
         });
     });
-    console.log(newBoardTiles);
     return newBoardTiles.size > 0;
 }
