@@ -157,21 +157,28 @@ export default class App extends React.Component<IProps, IState> {
         newSource: ClickSrc,
         ev: React.MouseEvent<HTMLTableCellElement>
     ) {
+        console.log("handleClick", ev);
+        const target = ev.currentTarget;
+        console.log("handleClick target", target);
+        if (null === target || target.parentElement === null) {
+            return;
+        }
+        const parent = target.parentElement as HTMLTableRowElement;
+        console.log("handleClick parent", parent);
+        // if (!parent) {
+        //     return;
+        // }
+        const rowIdx = parent.rowIndex;
+        const cellIdx = target.cellIndex;
+
         // @ts-ignore
         this.setState((prevState: IState) => {
-            const target = ev.currentTarget;
-            if (null === target || target.parentElement === null) {
-                return;
-            }
-            const parent = target.parentElement as HTMLTableRowElement;
-            const currentRow = parent.rowIndex;
-            const currentCell = target.cellIndex;
             if (prevState.moving === null) {
                 // target.classList.add("moving");
                 return {
                     moving: {
-                        row: currentRow,
-                        cell: currentCell,
+                        row: rowIdx,
+                        cell: cellIdx,
                         source: newSource,
                     },
                 };
@@ -200,14 +207,14 @@ export default class App extends React.Component<IProps, IState> {
                 return;
             }
             // Get the value in the cell we are moving into
-            tmp = dataDest[currentRow];
+            tmp = dataDest[rowIdx];
             if (undefined === tmp) {
                 return;
             }
-            const oldData = tmp[currentCell];
+            const oldData = tmp[cellIdx];
 
             // Set the new value
-            dataDest[currentRow][currentCell] = newData;
+            dataDest[rowIdx][cellIdx] = newData;
 
             // Now we need to put back the old value into the origin: swap
             if (newSource === originSource) {
