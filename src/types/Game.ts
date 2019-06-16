@@ -33,3 +33,14 @@ export interface IPlayerGameState {
     turn: number;
     playerTurn: string;
 }
+
+export enum EClickSrc {
+    Board = "board",
+    PlayerTray = "playerTray",
+}
+
+export interface IuiMove {
+    row: number;
+    cell: number;
+    source: EClickSrc;
+}

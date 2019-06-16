@@ -1,11 +1,14 @@
 import React from "react";
 import Tile from "./Tile";
 import { IGroupTile } from "./types/Game";
+import classnames from "classnames";
 
 interface iProps {
     readonly cls: string;
-    tiles: IGroupTile | null;
-    onClick: (ev: React.MouseEvent<HTMLTableCellElement>) => void;
+    readonly tiles: IGroupTile | null;
+    readonly movingRow: number;
+    readonly movingCell: number;
+    readonly onClick: (ev: React.MouseEvent<HTMLTableCellElement>) => void;
 }
 
 export default class TableOfTiles extends React.Component<iProps> {
@@ -54,7 +57,14 @@ export default class TableOfTiles extends React.Component<iProps> {
                                                     "-" +
                                                     cellIdx
                                                 }
-                                                className="cell"
+                                                className={classnames("cell", {
+                                                    cellClicked:
+                                                        this.props
+                                                            .movingCell ===
+                                                            cellIdx &&
+                                                        this.props.movingRow ===
+                                                            rowIdx,
+                                                })}
                                                 onClick={this.props.onClick}
                                             >
                                                 {cell !== null && (

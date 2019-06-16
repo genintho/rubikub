@@ -1,11 +1,13 @@
 /* global io window socket */
 import React from "react";
+import classnames from "classnames";
 import { TileModel } from "./models/TileModel";
 import * as ACTIONS from "./server/actions";
 import TableOfTiles from "./TableOfTiles";
 import { isValidMove } from "./lib/isValidMove";
 import { ISocket } from "./types/ISocket";
 import {
+    EClickSrc,
     IBoard,
     IPlayerGameState,
     ITileJSON,
@@ -13,14 +15,10 @@ import {
     IPlayerTray,
     IPlayers,
     TileRow,
+    IuiMove,
 } from "./types/Game";
 
 declare var socket: ISocket;
-
-enum ClickSrc {
-    Board = "board",
-    PlayerTray = "playerTray",
-}
 
 function createModels(data: any): IGroupTile {
     let matrix: IGroupTile = [];
@@ -62,11 +60,7 @@ interface IState {
     players: IPlayers;
     turn: number;
     playerTurn: string;
-    moving: null | {
-        row: number;
-        cell: number;
-        source: ClickSrc;
-    };
+    moving: null | IuiMove;
     previousValidState: {
         board: IBoard;
         playerTray: IPlayerTray;
@@ -157,7 +151,7 @@ export default class App extends React.Component<IProps, IState> {
     }
 
     handleClick(
-        newSource: ClickSrc,
+        newSource: EClickSrc,
         ev: React.MouseEvent<HTMLTableCellElement>
     ) {
         console.log("handleClick", ev);
@@ -190,6 +184,7 @@ export default class App extends React.Component<IProps, IState> {
             const originSource = prevState.moving.source;
             // ev.currentTarget.classList.remove("moving");
 
+            // @ts-ignore
             let dataOrigin = prevState[prevState.moving.source];
             if (dataOrigin === null) {
                 return;
@@ -244,14 +239,14 @@ export default class App extends React.Component<IProps, IState> {
     }
 
     handleBoardClick(ev: React.MouseEvent<HTMLTableCellElement>) {
-        this.handleClick(ClickSrc.Board, ev);
+        this.handleClick(EClickSrc.Board, ev);
         this.log("post click");
     }
 
     handleTrayClick(ev: React.MouseEvent<HTMLTableCellElement>) {
         // const { moving } = this.state;
         // const wasTrayMove = moving !== null && moving.source === "playerTray";
-        this.handleClick(ClickSrc.PlayerTray, ev);
+        this.handleClick(EClickSrc.PlayerTray, ev);
         // if (wasTrayMove) {
         //     this.saveTrayState();
         // }
@@ -318,7 +313,14 @@ export default class App extends React.Component<IProps, IState> {
 
         //         this.state.board == this.state.previousValidState.board
         //     );
-        const { board, playerTray, players, turn, playerTurn } = this.state;
+        const {
+            board,
+            playerTray,
+            players,
+            turn,
+            playerTurn,
+            moving,
+        } = this.state;
         const isPlayerTurn =
             playerTurn === window.localStorage.getItem("playerID");
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
@@ -331,18 +333,30 @@ export default class App extends React.Component<IProps, IState> {
                         {players.map((playerName: string) => (
                             <li
                                 key={playerName}
-                                className={
-                                    playerTurn === playerName
-                                        ? "playerTurn"
-                                        : ""
-                                }
+                                className={classnames({
+                                    playerTurn: playerTurn === playerName,
+                                })}
                             >
                                 {playerName}
                             </li>
                         ))}
                     </ul>
                 </div>
-                <TableOfTiles cls="board" tiles={board} onClick={boardClick} />
+                <TableOfTiles
+                    cls="board"
+                    tiles={board}
+                    onClick={boardClick}
+                    movingCell={
+                        moving && moving.source === EClickSrc.Board
+                            ? moving.cell
+                            : -1
+                    }
+                    movingRow={
+                        moving && moving.source === EClickSrc.Board
+                            ? moving.row
+                            : -1
+                    }
+                />
                 {isPlayerTurn && (
                     <div>
                         <button type="button" onClick={this.handlePlayClick}>
@@ -361,6 +375,16 @@ export default class App extends React.Component<IProps, IState> {
                     cls="player-tray"
                     tiles={playerTray}
                     onClick={this.handleTrayClick}
+                    movingCell={
+                        moving && moving.source === EClickSrc.PlayerTray
+                            ? moving.cell
+                            : -1
+                    }
+                    movingRow={
+                        moving && moving.source === EClickSrc.PlayerTray
+                            ? moving.row
+                            : -1
+                    }
                 />
             </div>
         );
