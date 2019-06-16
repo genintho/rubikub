@@ -21,7 +21,7 @@ export function createInitialState(
         }
     });
 
-    const playersHand: any = [];
+    const playersHand: IPlayerTray[] = [];
     const players: string[] = [];
     for (let playerIdx = 0; playerIdx < numPlayer; playerIdx += 1) {
         players[playerIdx] = "";
