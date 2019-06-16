@@ -341,10 +341,11 @@ export default class App extends React.Component<IProps, IState> {
                             Draw
                         </button>
                         <button type="button" onClick={this.handleResetClick}>
-                            Rest Moves
+                            Reset Moves
                         </button>
                     </div>
                 )}
+
                 <TableOfTiles
                     cls="player-tray"
                     tiles={playerTray}
