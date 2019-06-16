@@ -2,7 +2,7 @@ import { ISocket } from "../../types/ISocket";
 
 const GameStateStore = require("../GameStateStore");
 const ACTIONS = require("../actions");
-const sendState = require("../sendState");
+const sendState = require("../sendState").sendState;
 
 export interface IPlayAction {
     board: string;
@@ -14,10 +14,8 @@ export function play(socket: ISocket, { board, playerTray }: IPlayAction) {
     const state = GameStateStore.get(socket.roomID);
     // @TODO add check that the correct user is playing
     state.turn += 1;
-    state.board = JSON.parse(board);
-    state.playersHand[state.players.indexOf(socket.playerID)] = JSON.parse(
-        playerTray
-    );
+    state.board = board;
+    state.playersHand[state.players.indexOf(socket.playerID)] = playerTray;
     sendState(socket);
     socket.broadcast.emit(ACTIONS.RELOAD);
 }
