@@ -6,8 +6,8 @@ export function sendState(socket: any) {
     const state = GameStateStore.get(socket.roomID);
     const tray = state.playersHand[state.players.indexOf(socket.playerID)];
     const payload: IPlayerGameState = {
-        playerTray: tray ? tray.toJS() : [],
-        board: state.board.toJS(),
+        playerTray: tray,
+        board: state.board,
         playerID: socket.playerID,
         players: state.players,
         turn: state.turn,

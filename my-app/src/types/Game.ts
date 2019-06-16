@@ -1,15 +1,14 @@
 import { TileModel } from "../models/TileModel";
-import { List } from "immutable";
 
-export type TileRow = List<TileModel | null>;
-export type IGroupTile = List<TileRow>;
-export type IPlayerTray = IGroupTile;
+export type TileRow = (TileModel | null)[];
+export type IGroupTile = TileRow[];
+// export type IPlayerTray = IGroupTile;
 export type IBoard = IGroupTile;
 
 export type IPlayerID = string;
 export type IPlayers = string[];
 
-// export type IPlayerTray = [TileRow, TileRow, TileRow];
+export type IPlayerTray = IGroupTile;
 
 export interface ITileJSON {
     readonly set: number;
@@ -28,8 +27,8 @@ export interface IGameState {
 
 export interface IPlayerGameState {
     playerID: IPlayerID;
-    playerTray: ITileJSON[][];
+    playerTray: IGroupTile;
     players: IPlayers;
-    board: ITileJSON[][];
+    board: IGroupTile;
     turn: number;
 }

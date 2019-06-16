@@ -11,14 +11,17 @@ export function draw(socket: any) {
     const pickIdx = _.random(0, state.bucket.length - 1);
     const picks = [state.bucket.splice(pickIdx, 1)[0]];
     const playerIdx = state.players.indexOf(socket.playerID);
+    let pick: any = null;
     state.playersHand[playerIdx].forEach((row: TileRow, rowIdx: number) => {
+        console.log("row", rowIdx);
         row.forEach((cell, cellIdx) => {
-            if (cell === null && picks.length) {
-                const pick = picks.pop();
+            console.log("row", rowIdx, "cell", cellIdx, cell);
+            if (pick === null && cell === null && picks.length) {
+                console.log("found a spot");
+                pick = picks.pop();
                 if (pick) {
-                    state.playersHand[playerIdx] = state.playersHand[
-                        playerIdx
-                    ].setIn([rowIdx, cellIdx], pick);
+                    console.log("player", socket.playerID, " pick", pick);
+                    state.playersHand[playerIdx][rowIdx][cellIdx] = pick;
                 }
             }
         });

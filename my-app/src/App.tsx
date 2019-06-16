@@ -1,6 +1,5 @@
 /* global io window socket */
 import React from "react";
-import { List } from "immutable";
 import { TileModel } from "./models/TileModel";
 import * as ACTIONS from "./server/actions";
 import TableOfTiles from "./TableOfTiles";
@@ -8,12 +7,12 @@ import { isValidMove } from "./lib/isValidMove";
 import { ISocket } from "./types/ISocket";
 import {
     IBoard,
-    IGroupTile,
     IPlayerGameState,
     ITileJSON,
-    TileRow,
+    IGroupTile,
     IPlayerTray,
     IPlayers,
+    TileRow,
 } from "./types/Game";
 
 declare var socket: ISocket;
@@ -24,22 +23,16 @@ enum ClickSrc {
 }
 
 function createModels(data: any): IGroupTile {
-    let matrix = List();
+    let matrix: IGroupTile = [];
     data.forEach((row: ITileJSON[], rowIdx: number) => {
-        let rowList = List();
+        let rowList: TileRow = [];
         row.forEach((cell: ITileJSON, cellIdx: number) => {
-            if (cell) {
-                // @ts-ignore
-                cell = cell[0];
-            }
-            rowList = rowList.set(
-                cellIdx,
+            rowList[cellIdx] =
                 cell === null
                     ? null
-                    : new TileModel(cell.set, cell.color, cell.value)
-            );
+                    : new TileModel(cell.set, cell.color, cell.value);
         });
-        matrix = matrix.set(rowIdx, rowList);
+        matrix[rowIdx] = rowList;
     });
     return matrix;
 }
@@ -146,7 +139,7 @@ export default class App extends React.Component<IProps, IState> {
         });
 
         // @ts-ignore
-        window.socket = socket;
+        window.socket = socket as ISocket;
     }
 
     log(msg: any) {
@@ -194,38 +187,38 @@ export default class App extends React.Component<IProps, IState> {
 
             const originRow = prevState.moving.row;
             const originCell = prevState.moving.cell;
-            if (!dataOrigin.get(originRow)) {
+            if (!dataOrigin[originRow]) {
                 return;
             }
-            let tmp = dataOrigin.get(originRow);
+            let tmp = dataOrigin[originRow];
             if (undefined === tmp) {
                 return;
             }
-            const newData = tmp.get(originCell);
+            const newData = tmp[originCell];
             let dataDest = prevState[newSource];
             if (dataDest === null) {
                 return;
             }
             // Get the value in the cell we are moving into
-            tmp = dataDest.get(currentRow);
+            tmp = dataDest[currentRow];
             if (undefined === tmp) {
                 return;
             }
-            const oldData = tmp.get(currentCell);
+            const oldData = tmp[currentCell];
 
             // Set the new value
-            dataDest = dataDest.setIn([currentRow, currentCell], newData);
+            dataDest[currentRow][currentCell] = newData;
 
             // Now we need to put back the old value into the origin: swap
             if (newSource === originSource) {
-                dataDest = dataDest.setIn([originRow, originCell], oldData);
+                dataDest[originRow][originCell] = oldData;
                 // @ts-ignore
                 dataPatch[newSource] = dataDest;
             }
             // @ts-ignore
             dataPatch[newSource] = dataDest;
             if (newSource !== originSource) {
-                dataOrigin = dataOrigin.setIn([originRow, originCell], oldData);
+                dataOrigin[originRow][originCell] = oldData;
                 // @ts-ignore
                 dataPatch[originSource] = dataOrigin;
             }
@@ -267,14 +260,14 @@ export default class App extends React.Component<IProps, IState> {
         // 1. Make sure all board pieces are still there
         // 2. Build all the groups of pieces we can find
         // 3. Make sure all the groups are valid
-        console.log(board.toJS());
+        console.log(board);
         if (!isValidMove(board, previousValidState.board)) {
             window.alert("INVALID MOVE"); // eslint-disable-line no-alert
             return;
         }
         socket.emit(ACTIONS.PLAY, {
-            board: JSON.stringify(board.toJS()),
-            playerTray: JSON.stringify(playerTray.toJS()),
+            board: board,
+            playerTray: playerTray,
         });
     }
 
@@ -322,10 +315,7 @@ export default class App extends React.Component<IProps, IState> {
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>
-                <h1>
-                    Turn
-                    {turn}
-                </h1>
+                <h1>Turn {turn}</h1>
                 <div className="players-list">
                     <p>Players:</p>
                     <ul>
