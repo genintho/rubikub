@@ -6,6 +6,7 @@ import { ISocket } from "../../types/ISocket";
 function assignPlayer(socket: ISocket, playerID: string) {
     socket.playerID = playerID === null ? socket.id : playerID;
     const state = GameStateStore.get(socket.roomID);
+    console.log("Game players", state.players);
     let idx = state.players.indexOf(socket.playerID);
     console.log("idx found", idx);
     if (idx === -1) {
