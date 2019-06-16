@@ -145,7 +145,8 @@ export default class App extends React.Component<IProps, IState> {
             window.location.reload();
         });
 
-        // window.socket = socket;
+        // @ts-ignore
+        window.socket = socket;
     }
 
     log(msg: any) {
