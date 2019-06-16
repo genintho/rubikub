@@ -40,7 +40,7 @@ export class TileGroupModel {
             if (prevTile.color !== curTile.color) {
                 valid = false;
             }
-            if (prevTile.value + 1 !== curTile.value) {
+            if (Number(prevTile.value) + 1 !== Number(curTile.value)) {
                 valid = false;
             }
         }
