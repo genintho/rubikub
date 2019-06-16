@@ -3,7 +3,6 @@ import { TileModel, TileColors } from "../models/TileModel";
 import { IBoard } from "../types/Game";
 import { IPlayerTray } from "../types/Game";
 import { IGameState } from "../types/Game";
-import { List } from "immutable";
 
 const gameState: Map<string, IGameState> = new Map();
 
@@ -26,28 +25,24 @@ export function createInitialState(
     const players: string[] = [];
     for (let playerIdx = 0; playerIdx < numPlayer; playerIdx += 1) {
         players[playerIdx] = "";
-        playersHand[playerIdx] = List();
-        playersHand[playerIdx] = playersHand[playerIdx].set(0, List());
-        playersHand[playerIdx] = playersHand[playerIdx].set(1, List());
-        playersHand[playerIdx] = playersHand[playerIdx].set(2, List());
+        playersHand[playerIdx] = [[], [], []];
 
         for (let pickNum = 0; pickNum < 14; pickNum += 1) {
             const pickIdx = _.random(0, allTiles.length - 1);
-            playersHand[playerIdx] = playersHand[playerIdx].setIn(
-                [0, pickNum],
-                allTiles.splice(pickIdx, 1)
-            );
+            playersHand[playerIdx][0][pickNum] = allTiles.splice(pickIdx, 1)[0];
+            playersHand[playerIdx][1][pickNum] = null;
+            playersHand[playerIdx][2][pickNum] = null;
         }
     }
     players[0] = playerID;
 
-    let board: IBoard = List();
+    let board: IBoard = [];
     for (let rowIdx = 0; rowIdx < 10; rowIdx += 1) {
-        let row = List();
+        let row = [];
         for (let columnIdx = 0; columnIdx < 14; columnIdx += 1) {
-            row = row.set(columnIdx, null);
+            row[columnIdx] = null;
         }
-        board = board.set(rowIdx, row);
+        board[rowIdx] = row;
     }
     gameState.set(roomID, {
         bucket: allTiles,
