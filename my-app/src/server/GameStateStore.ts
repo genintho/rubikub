@@ -39,6 +39,7 @@ export function createInitialState(
             );
         }
     }
+    players[0] = playerID;
 
     let board: IBoard = List();
     for (let rowIdx = 0; rowIdx < 10; rowIdx += 1) {

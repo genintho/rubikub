@@ -6,10 +6,13 @@ import { ISocket } from "../../types/ISocket";
 function assignPlayer(socket: ISocket, playerID: string) {
     socket.playerID = playerID === null ? socket.id : playerID;
     const state = GameStateStore.get(socket.roomID);
-    if (state.players.indexOf(socket.playerID) === -1) {
-        const idx = state.players.indexOf("");
-        console.log("idx found", idx);
-        state.players[idx] = playerID;
+    let idx = state.players.indexOf(socket.playerID);
+    console.log("idx found", idx);
+    if (idx === -1) {
+        console.log("does not know this player");
+        const iddx = state.players.indexOf("");
+        console.log("New Player will be ", iddx);
+        state.players[iddx] = playerID;
     }
 }
 
