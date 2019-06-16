@@ -11,7 +11,7 @@ export default class Tile extends React.Component<{ data: any }> {
             <div
                 draggable={true}
                 // className={Styles.tile}
-                style={{ color: data.color, border: "solid 1px " + data.color }}
+                style={{ color: data.color, borderColor: data.color }}
                 onDragStart={(ev) => {
                     // window.drag(ev);
                 }}
