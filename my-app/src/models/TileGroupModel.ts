@@ -1,9 +1,12 @@
+import { TileModel } from "./TileModel";
+
 export class TileGroupModel {
+    private _tiles: TileModel[];
     constructor() {
         this._tiles = [];
     }
 
-    add(tile) {
+    add(tile: TileModel) {
         this._tiles.push(tile);
     }
 
@@ -62,4 +65,4 @@ export class TileGroupModel {
         });
         return valid;
     }
-};
+}
