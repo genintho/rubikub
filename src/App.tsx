@@ -1,4 +1,5 @@
 /* global io window socket */
+import * as _ from "lodash";
 import React from "react";
 import classnames from "classnames";
 import { TileModel } from "./models/TileModel";
@@ -17,6 +18,7 @@ import {
     TileRow,
     IuiMove,
 } from "./types/Game";
+import { cloneDeep } from "@babel/types";
 
 declare var socket: ISocket;
 
@@ -46,8 +48,8 @@ function processGameState(gameState: IPlayerGameState): IState {
         turn: gameState.turn,
         playerTurn: gameState.playerTurn,
         previousValidState: {
-            board,
-            playerTray,
+            board: _.cloneDeep(board),
+            playerTray: _.cloneDeep(playerTray),
         },
     };
 }
@@ -154,14 +156,11 @@ export default class App extends React.Component<IProps, IState> {
         newSource: EClickSrc,
         ev: React.MouseEvent<HTMLTableCellElement>
     ) {
-        console.log("handleClick", ev);
         const target = ev.currentTarget;
-        console.log("handleClick target", target);
         if (null === target || target.parentElement === null) {
             return;
         }
         const parent = target.parentElement as HTMLTableRowElement;
-        console.log("handleClick parent", parent);
         // if (!parent) {
         //     return;
         // }
@@ -306,7 +305,6 @@ export default class App extends React.Component<IProps, IState> {
 
     render() {
         this.log("Render");
-
         // if (this.state.board.length)
         //     console.log(
         //         "equal",
