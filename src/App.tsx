@@ -46,6 +46,7 @@ function processGameState(gameState: IPlayerGameState): IState {
         playerTray,
         players: gameState.players,
         turn: gameState.turn,
+        playerTurn: gameState.playerTurn,
         previousValidState: {
             board,
             playerTray,
@@ -60,6 +61,7 @@ interface IState {
     playerTray: IPlayerTray | null;
     players: IPlayers;
     turn: number;
+    playerTurn: string;
     moving: null | {
         row: number;
         cell: number;
@@ -84,6 +86,7 @@ export default class App extends React.Component<IProps, IState> {
             playerTray: null,
             board: null,
             turn: 0,
+            playerTurn: "",
             players: [],
             moving: null,
             previousValidState: null,
@@ -315,10 +318,9 @@ export default class App extends React.Component<IProps, IState> {
 
         //         this.state.board == this.state.previousValidState.board
         //     );
-        const { board, playerTray, players, turn } = this.state;
+        const { board, playerTray, players, turn, playerTurn } = this.state;
         const isPlayerTurn =
-            players[turn % players.length] ===
-            window.localStorage.getItem("playerID");
+            playerTurn === window.localStorage.getItem("playerID");
         const boardClick = isPlayerTurn ? this.handleBoardClick : () => {};
         return (
             <div>
@@ -327,7 +329,16 @@ export default class App extends React.Component<IProps, IState> {
                     <p>Players:</p>
                     <ul>
                         {players.map((playerName: string) => (
-                            <li key={playerName}>{playerName}</li>
+                            <li
+                                key={playerName}
+                                className={
+                                    playerTurn === playerName
+                                        ? "playerTurn"
+                                        : ""
+                                }
+                            >
+                                {playerName}
+                            </li>
                         ))}
                     </ul>
                 </div>
