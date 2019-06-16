@@ -2,13 +2,12 @@ import { TileModel } from "../models/TileModel";
 
 export type TileRow = (TileModel | null)[];
 export type IGroupTile = TileRow[];
-// export type IPlayerTray = IGroupTile;
+export type IPlayerTray = IGroupTile;
 export type IBoard = IGroupTile;
 
 export type IPlayerID = string;
-export type IPlayers = string[];
-
-export type IPlayerTray = IGroupTile;
+export type IPlayer = IPlayerID;
+export type IPlayers = IPlayer[];
 
 export interface ITileJSON {
     readonly set: number;
