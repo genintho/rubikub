@@ -1,4 +1,6 @@
-export function hasAllBoardPieces(currentBoard, previousBoard) {
+import { IBoard } from "../../types/Game";
+
+export function hasAllBoardPieces(currentBoard: IBoard, previousBoard: IBoard) {
     const newBoardTiles = new Set();
     currentBoard.forEach((row) => {
         row.forEach((cell) => {
@@ -17,4 +19,4 @@ export function hasAllBoardPieces(currentBoard, previousBoard) {
     });
 
     return hasAllPieces;
-};
+}

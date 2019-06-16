@@ -29,6 +29,6 @@ export interface IPlayerGameState {
     playerID: IPlayerID;
     playerTray: IGroupTile;
     players: IPlayers;
-    board: IGroupTile;
+    board: IBoard;
     turn: number;
 }

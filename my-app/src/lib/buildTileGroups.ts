@@ -1,22 +1,25 @@
-import {TileGroupModel} from "../models/TileGroupModel";
+import { TileGroupModel } from "../models/TileGroupModel";
+import { IBoard } from "../types/Game";
 
-export function buildTileGroups(board) {
-    const groups = [];
+export function buildTileGroups(board: IBoard): TileGroupModel[] {
+    const groups: TileGroupModel[] = [];
     board.forEach((row) => {
         let previsCell = false;
-        let curGroup = null;
+        let curGroup: TileGroupModel | null = null;
         row.forEach((cell) => {
             if (cell !== null) {
                 // We are seeing a new group
-                if (previsCell === false) {
+                if (!previsCell) {
                     curGroup = new TileGroupModel();
                     groups.push(curGroup);
                 }
                 previsCell = true;
-                curGroup.add(cell);
+                if (curGroup) {
+                    curGroup.add(cell);
+                }
             }
             if (cell === null) {
-                if (previsCell === true) {
+                if (previsCell) {
                     curGroup = null;
                 }
                 previsCell = false;
@@ -24,4 +27,4 @@ export function buildTileGroups(board) {
         });
     });
     return groups;
-};
+}
