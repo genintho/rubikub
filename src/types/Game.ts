@@ -31,4 +31,5 @@ export interface IPlayerGameState {
     players: IPlayers;
     board: IBoard;
     turn: number;
+    playerTurn: string;
 }

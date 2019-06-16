@@ -11,6 +11,7 @@ export function sendState(socket: any) {
         playerID: socket.playerID,
         players: state.players,
         turn: state.turn,
+        playerTurn: state.players[state.turn % state.players.length],
     };
     socket.emit(ACTIONS.GAME_STATE, payload);
 }
