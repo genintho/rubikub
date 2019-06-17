@@ -21,9 +21,4 @@ io.on("connection", (socket: Socket) => {
     socket.on("disconnect", () => console.log("Client disconnected"));
 
     actionMapper(socket);
-    // socket.on(ACTIONS.TRAY_MOVE, (msg) => {
-    //     console.log(ACTIONS.TRAY_MOVE, socket.roomID);
-    //     const state = gameState.get(socket.roomID);
-    //     state.playersHand[msg.playerID] = msg.playerHand;
-    // });
 });

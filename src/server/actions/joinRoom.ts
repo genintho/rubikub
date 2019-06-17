@@ -1,6 +1,6 @@
 import * as GameStateStore from "../GameStateStore";
 import * as ACTIONS from "../actions";
-import { sendState } from "../sendState";
+import * as Send from "../send";
 import { ISocket } from "../../types/ISocket";
 
 function assignPlayer(socket: ISocket, playerID: string) {
@@ -35,5 +35,7 @@ export function joinRoom(
     socket.roomID = roomID; // eslint-disable-line
     socket.join(roomID);
     assignPlayer(socket, playerID);
-    sendState(socket);
+
+    Send.gameState(socket);
+    Send.playerTray(socket);
 }

@@ -11,6 +11,9 @@ export function isValidMove(currentBoard: IBoard, previousBoard: IBoard) {
         true
     );
     const hasMov = hasMoved(currentBoard, previousBoard);
+    console.log(currentBoard);
+    console.log("------");
+    console.log(previousBoard);
     console.log("isValidMove");
     console.log("hasAllBoardPieces", hasAllBoardP);
     console.log("buildTileG", buildTileG);
