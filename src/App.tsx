@@ -1,57 +1,20 @@
 /* global io window socket */
-import * as _ from "lodash";
 import React from "react";
 import classnames from "classnames";
-import { TileModel } from "./models/TileModel";
+import { createModels } from "./lib/createModels";
 import * as ACTIONS from "./server/actions";
 import TableOfTiles from "./TableOfTiles";
-import { isValidMove } from "./lib/isValidMove";
 import { ISocket } from "./types/ISocket";
 import {
     EClickSrc,
     IBoard,
     IPlayerGameState,
-    ITileJSON,
-    IGroupTile,
     IPlayerTray,
     IPlayers,
-    TileRow,
     IuiMove,
 } from "./types/Game";
 
 declare var socket: ISocket;
-
-function createModels(data: any): IGroupTile {
-    let matrix: IGroupTile = [];
-    data.forEach((row: ITileJSON[], rowIdx: number) => {
-        let rowList: TileRow = [];
-        row.forEach((cell: ITileJSON, cellIdx: number) => {
-            rowList[cellIdx] =
-                cell === null
-                    ? null
-                    : new TileModel(cell.set, cell.color, cell.value);
-        });
-        matrix[rowIdx] = rowList;
-    });
-    return matrix;
-}
-
-function processGameState(gameState: IPlayerGameState): IState {
-    const board = createModels(gameState.board);
-    const playerTray = createModels(gameState.playerTray);
-    return {
-        board,
-        moving: null,
-        playerTray,
-        players: gameState.players,
-        turn: gameState.turn,
-        playerTurn: gameState.playerTurn,
-        previousValidState: {
-            board: _.cloneDeep(board),
-            playerTray: _.cloneDeep(playerTray),
-        },
-    };
-}
 
 interface IProps {}
 
@@ -62,10 +25,6 @@ interface IState {
     turn: number;
     playerTurn: string;
     moving: null | IuiMove;
-    previousValidState: {
-        board: IBoard;
-        playerTray: IPlayerTray;
-    } | null;
 }
 
 export default class App extends React.Component<IProps, IState> {
@@ -84,7 +43,6 @@ export default class App extends React.Component<IProps, IState> {
             playerTurn: "",
             players: [],
             moving: null,
-            previousValidState: null,
         };
     }
 
@@ -126,14 +84,27 @@ export default class App extends React.Component<IProps, IState> {
             }, 200);
         });
 
-        socket.on(ACTIONS.GAME_STATE, (msg: IPlayerGameState) => {
-            console.log("GAME_STATE", msg);
-            window.localStorage.setItem("playerID", msg.playerID);
-            this.setState(processGameState(msg));
+        socket.on(ACTIONS.NEW_GAME_STATE, (msg: IPlayerGameState) => {
+            console.log("ACTIONS.GAME_STATE", msg);
+            // window.localStorage.setItem("playerID", msg.playerID);
+            const board = createModels(msg.board);
+            const newState: any = {
+                board,
+                moving: null,
+                players: msg.players,
+                turn: msg.turn,
+                playerTurn: msg.playerTurn,
+            };
+            this.setState(newState);
         });
 
-        socket.on(ACTIONS.RELOAD, () => {
-            window.location.reload();
+        socket.on(ACTIONS.PLAYER_TRAY, (a) => {
+            console.log("ACTION.PLAYER_TRAY", a);
+            this.setState({ playerTray: createModels(a.playerTray) });
+        });
+
+        socket.on(ACTIONS.ERROR_MOVE, (msg) => {
+            alert(msg);
         });
 
         // @ts-ignore
@@ -141,14 +112,7 @@ export default class App extends React.Component<IProps, IState> {
     }
 
     log(msg: any) {
-        if (this.state.previousValidState)
-            console.log(
-                msg,
-                // this.state.previousValidState.board[
-                // this.state.previousValidState.board.size - 1
-                // ][0],
-                this.state
-            );
+        console.log(msg, this.state);
     }
 
     handleClick(
@@ -240,29 +204,23 @@ export default class App extends React.Component<IProps, IState> {
     }
 
     handleTrayClick(ev: React.MouseEvent<HTMLTableCellElement>) {
-        // const { moving } = this.state;
-        // const wasTrayMove = moving !== null && moving.source === "playerTray";
+        const { moving } = this.state;
+        const wasTrayMove = moving !== null && moving.source === "playerTray";
         this.handleClick(EClickSrc.PlayerTray, ev);
-        // if (wasTrayMove) {
-        //     this.saveTrayState();
-        // }
+        if (wasTrayMove) {
+            const { playerTray } = this.state;
+            // Hack to deal with React Async setState call
+            setImmediate(() => {
+                socket.emit(ACTIONS.TRAY_MOVE, {
+                    playerTray,
+                });
+            });
+        }
     }
 
     handlePlayClick() {
-        const { board, playerTray, previousValidState } = this.state;
-        if (
-            board === null ||
-            playerTray === null ||
-            previousValidState === null
-        ) {
-            return;
-        }
-        // User click play, let's check the state of the game
-        // 1. Make sure all board pieces are still there
-        // 2. Build all the groups of pieces we can find
-        // 3. Make sure all the groups are valid
-        if (!isValidMove(board, previousValidState.board)) {
-            window.alert("INVALID MOVE"); // eslint-disable-line no-alert
+        const { board, playerTray } = this.state;
+        if (board === null || playerTray === null) {
             return;
         }
         socket.emit(ACTIONS.PLAY, {
@@ -275,37 +233,23 @@ export default class App extends React.Component<IProps, IState> {
         socket.emit(ACTIONS.DRAW, {});
     }
 
-    // saveTrayState() {
-    //     const { playerTray } = this.state;
-    //     window.socket.emit(ACTIONS.TRAY_MOVE, {
-    //         playerID: 0,
-    //         playerTray,
-    //     });
-    // }
-
     handleResetClick() {
         this.log("Click Reset");
-        const { previousValidState } = Object.assign({}, this.state);
-        if (previousValidState === null) {
-            return;
-        }
-        this.setState({
-            // return {
-            moving: null,
-            board: previousValidState.board,
-            playerTray: previousValidState.playerTray,
-            // };
-        });
+        // const { previousValidState } = Object.assign({}, this.state);
+        // if (previousValidState === null) {
+        //     return;
+        // }
+        // this.setState({
+        //     // return {
+        //     moving: null,
+        //     board: previousValidState.board,
+        //     playerTray: previousValidState.playerTray,
+        //     // };
+        // });
     }
 
     render() {
         this.log("Render");
-        // if (this.state.board.length)
-        //     console.log(
-        //         "equal",
-
-        //         this.state.board == this.state.previousValidState.board
-        //     );
         const {
             board,
             playerTray,

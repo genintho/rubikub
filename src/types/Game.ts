@@ -26,7 +26,7 @@ export interface IGameState {
 
 export interface IPlayerGameState {
     playerID: IPlayerID;
-    playerTray: IGroupTile;
+    // playerTray: IGroupTile;
     players: IPlayers;
     board: IBoard;
     turn: number;
