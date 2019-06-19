@@ -302,9 +302,9 @@ export default class App extends React.Component<IProps, IState> {
                         <button type="button" onClick={this.handleDrawClick}>
                             Draw
                         </button>
-                        <button type="button" onClick={this.handleResetClick}>
-                            Reset Moves
-                        </button>
+                        {/*<button type="button" onClick={this.handleResetClick}>*/}
+                        {/*    Reset Moves*/}
+                        {/*</button>*/}
                     </div>
                 )}
 
