@@ -33,7 +33,6 @@ export function hasMoved(currentBoard: IBoard, previousBoard: IBoard): boolean {
             }
         });
     });
-    console.log("Saw on new board", newBoardTiles);
     previousBoard.forEach((row) => {
         row.forEach((cell) => {
             if (cell && newBoardTiles.has(cell.id)) {
@@ -41,6 +40,5 @@ export function hasMoved(currentBoard: IBoard, previousBoard: IBoard): boolean {
             }
         });
     });
-    console.log("diff board", newBoardTiles);
     return newBoardTiles.size > 0;
 }
