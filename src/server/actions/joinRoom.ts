@@ -11,9 +11,17 @@ function assignPlayer(socket: ISocket, playerID: string) {
     console.log("idx found", idx);
     if (idx === -1) {
         console.log("does not know this player");
-        const iddx = state.players.indexOf("");
-        console.log("New Player will be ", iddx);
-        state.players[iddx] = playerID;
+        const freeSpotIdx = state.players.indexOf("");
+        console.log(
+            "New Player will be ",
+            freeSpotIdx,
+            "player size",
+            state.players.length
+        );
+        if (freeSpotIdx === -1 || freeSpotIdx > state.players.length) {
+            throw new Error("Invalid player ID idx '" + freeSpotIdx + "'");
+        }
+        state.players[freeSpotIdx] = playerID;
     }
 }
 
@@ -28,6 +36,7 @@ export function joinRoom(
 ) {
     console.log("JOIN room", roomID, "player", playerID);
     if (!GameStateStore.has(roomID)) {
+        console.log("Room does not exist. Send Reset");
         socket.emit(ACTIONS.GAME_RESET);
         return;
     }

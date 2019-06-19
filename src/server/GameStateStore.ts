@@ -48,7 +48,6 @@ export function createInitialState(
         bucket: allTiles,
         playersHand,
         players,
-        // table: tableState,
         board,
         turn: 0,
     });
